@@ -37,7 +37,7 @@ app.controller('pokemonCtrl', function($scope, $http, $window) {
 			var hp = pokemon.stats.find(stat => stat.stat.name === 'hp').base_stat;
 			
 			$scope.enemyPokemon = {
-				name: pokemon.name.split("-")[0],
+				name: pokemon.name.split("-")[0].toUpperCase(),
 				imageFront: pokemon.sprites.front_default,
 				imageBack: pokemon.sprites.back_default,
 				baseExperience: pokemon.base_experience,
@@ -65,7 +65,7 @@ app.controller('pokemonCtrl', function($scope, $http, $window) {
 
 				var newPokemon = {
 					id: id,
-					name: pokemon.name.split("-")[0],
+					name: pokemon.name.split("-")[0].toUpperCase(),
 					imageFront: pokemon.sprites.front_default,
 					imageBack: pokemon.sprites.back_default,
 					baseExperience: pokemon.base_experience,
@@ -105,8 +105,7 @@ app.controller('pokemonCtrl', function($scope, $http, $window) {
 			$(".current-pokemon").animate({left: '250px', bottom:'80px'});
 			$('.enemy-pokemon').ClassyWiggle();
 			$scope.playersTurn = false;
-			$scope.gameStatus = capitalize($scope.currentPokemon.name) + " uses " + capitalize(move.name);
-			console.log($scope.gameStatus);
+			$scope.gameStatus = $scope.currentPokemon.name + " uses " + capitalize(move.name);
 			var url = move.url;
 			$http.get(url).then(function(response) {
 				$(".current-pokemon").animate({left: '0px', bottom:'0px'});
@@ -137,8 +136,7 @@ app.controller('pokemonCtrl', function($scope, $http, $window) {
 			$('.current-pokemon').ClassyWiggle();
 			var index = Math.floor(Math.random() * $scope.enemyPokemon.moves.length);
 			var move = $scope.enemyPokemon.moves[index];
-			$scope.gameStatus = capitalize($scope.enemyPokemon.name) + " uses " + capitalize(move.name);
-			console.log($scope.gameStatus);
+			$scope.gameStatus = $scope.enemyPokemon.name + " uses " + capitalize(move.name);
 			var url = move.url;
 			$http.get(url).then(function(response) {
 				$('.current-pokemon').ClassyWiggle("stop");
@@ -195,6 +193,7 @@ app.controller('pokemonCtrl', function($scope, $http, $window) {
 
 app.filter('capitalize', function() {
     return function(input) {
+    	// used for moves
       return (!!input) ? input.charAt(0).toUpperCase() + input.substr(1).toLowerCase() : '';
     }
 });

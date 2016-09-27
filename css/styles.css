@@ -7,7 +7,9 @@ img {
 
 html, body {
 	height: 100%;
+	width: 100%;
 	margin: 0;
+	padding: 0;
 }
 
 .begin-btn {
@@ -28,10 +30,13 @@ html, body {
 
 .panel-heading {
 	padding: 0px;
+	font-family: 'pokemon';
 }
 
 .panel-body {
 	padding: 10px;
+	font-family: 'pokemon';
+
 }
 
 .list-group-item {
@@ -43,19 +48,30 @@ html, body {
 }
 
 .turn-border {
-	outline: 5px solid white;
+	outline: 5px solid orange;
 }
 
 .pokemon-name {
-	width: 100%;
-	height: 50%;
-	background: gray;
+	/*width: 100%;*/
+	/*height: 50%;*/
+	background: #ffffcc;
 	text-align: center;
-	color:white;
+	color:black;
+	font-family: 'pokemon';
+	
+	border: solid black 4px;
+	border-radius: 10px;
+
+}
+
+h1{
+	font-size: 20px;
+	/*padding: 2px;*/
 }
 
 .moves-panel {
 	width: 100%;
+	font-family: 'pokemon';
 }
 
 .health-bar {
@@ -71,3 +87,8 @@ html, body {
 	color:white;
 	padding-top:5px;
 }
+
+@font-face {
+font-family: 'pokemon'; 
+src: url('Pokemon GB.ttf'); 
+} 
