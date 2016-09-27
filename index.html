@@ -5,86 +5,124 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="./css/styles.css">
 	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="js/jquery.classywiggle.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js" type="text/javascript"></script>
 	<script src="./js/app.js" type="text/javascript"></script>
 </head>
 <body style="height:100%;" ng-app="myApp">
 	<div ng-controller="pokemonCtrl">
 		
-		<div style="background-image: url('./img/battleground.png');background-repeat: no-repeat;background-size: 100%;height:100%;width:100%;">	
-			<div class="row">
-				<div class="col-md-3 col-md-offset-9">
-					<div class="pokemon" ng-show="enemyPokemon">
-						<div class="pokemon-name">
-							<h1>{{ enemyPokemon.name | capitalize }}</h1>
-						</div>
-						<div class="health-bar">
-							<div class="hp-label">
-								HP
+		<div class="container-fluid">
+			<div ng-show="!gameReady" style="text-align:center;width: 100%;height:100%;z-index: 1;background-color: rgba(7,7,7,0.5);position: absolute;">
+				<div class="begin-btn" ng-click="startGame()">Begin Battle</div>
+			</div>
+			<img style="position: absolute;width: 100%;height: 100%;z-index: -1" src="./img/battleground.png" alt="test">
+			<div>
+				<div class="row">
+					<div class="col-md-3">
+						<div ng-show="currentPokemon" class="panel panel-default" style="margin: 20px;margin-left: 40px;">
+							<div class="panel-heading" style="text-align: center;padding: 0px;">
+								<h2>Game Stats</h2>
 							</div>
-							<div style="width:85%;float:left;">
-								<div ng-style="{'width': enemyPokemon.currentHp/enemyPokemon.totalHp*100 + '%'};" style="float:left;margin-top:10px;height:10px;background-color:lightgreen;border:2px solid white;"></div>
+							<div class="panel-body" >
+								<h4>Pokemon Defeated: {{ pokemonDefeated }}</h4>
+								<h4>Experience Gained: {{ experiencedGained }}</h4>
+								<h4>Your Pokemon: {{ pokemonRemaining }}</h4>
+								<hr>
+								<h4 style="text-align: right;padding-right: 40px;" ng-show="gameStatus">{{ gameStatus }}</h4>
 							</div>
-							<div style="background-color:black;width:100%;height: 8px;"></div>
 						</div>
-						<img ng-src="{{enemyPokemon.imageFront}}"  alt="{{enemyPokemon.name}}" />
+					</div>
+					<div class="col-md-2 col-md-offset-6">
+						<div class="pokemon" ng-show="enemyPokemon">
+							<div class="pokemon-name" ng-class="{'turn-border': !playersTurn}">
+								<h1>{{ enemyPokemon.name | capitalize }}</h1>
+							</div>
+							<div class="health-bar">
+								<div class="hp-label">
+									HP
+								</div>
+								<div style="width:85%;float:left;">
+									<div ng-style="{'width': enemyPokemon.currentHp/enemyPokemon.totalHp*100 + '%'};" style="float:left;margin-top:10px;height:10px;background-color:lightgreen;border:2px solid white;"></div>
+								</div>
+								<div style="background-color:black;width:100%;height: 8px;"></div>
+							</div>
+							<img ng-hide="enemyPokemon.dead" class="enemy-pokemon" ng-src="{{enemyPokemon.imageFront}}"  alt="{{enemyPokemon.name}}" />
+						</div>
 					</div>
 				</div>
-			</div>
 
-			<div class="row">
-				<div class="col-md-3">
-					<div class="pokemon" ng-show="currentPokemon">
-						<div class="pokemon-name">
-							<h1>{{ currentPokemon.name | capitalize }}</h1>
-						</div>
-						<div class="health-bar">
-							<div class="hp-label">
-								HP
+				<div class="row">
+					<div class="col-md-2 col-md-offset-1">
+						<div class="pokemon" ng-show="currentPokemon">
+							<div class="pokemon-name" ng-class="{'turn-border': playersTurn}">
+								<h1>{{ currentPokemon.name | capitalize }}</h1>
 							</div>
-							<div style="width:85%;float:left;">
-								<div ng-style="{'width': currentPokemon.currentHp/currentPokemon.totalHp*100 + '%'};" style="float:left;margin-top:10px;height:10px;background-color:lightgreen;border:2px solid white;"></div>
+							<div class="health-bar">
+								<div class="hp-label">
+									HP
+								</div>
+								<div style="width:85%;float:left;">
+									<div ng-style="{'width': currentPokemon.currentHp/currentPokemon.totalHp*100 + '%'};" style="float:left;margin-top:10px;height:10px;background-color:lightgreen;border:2px solid white;"></div>
+								</div>
+								<div style="background-color:black;width:100%;height: 8px;"></div>
 							</div>
-							<div style="background-color:black;width:100%;height: 8px;"></div>
-						</div>
-						<img ng-src="{{currentPokemon.imageBack}}"  alt="{{currentPokemon.name}}" />
-					</div>
-				</div>
-				<div class="col-md-3 col-md-offset-0" style="margin-top: 10%;">
-					<div class="panel moves-panel" ng-show="playersTurn">
-						<div class="panel-heading">
-							<h2>Moves</h2>
-						</div>
-						<div class="panel-body">
-							<ul class="list-group">
-								<li ng-click="attackEnemy(move)" ng-repeat="move in currentPokemon.moves" class="list-group-item clickable">
-									<label>{{move.name | capitalize }}</label>
-								</li>
-							</ul>
+							<img ng-hide="currentPokemon.dead" class="current-pokemon" ng-src="{{currentPokemon.imageBack}}"  alt="{{currentPokemon.name}}" />
 						</div>
 					</div>
-				</div>
-			</div>
-			<div class="row"  style="width:100%;height: 33%">
-				<div ng-repeat="pokemon in pokemons" class="col-md-2">
-					<div class="pokemon">
-						<div class="pokemon-name">
-							<h1>{{ pokemon.name | capitalize }}</h1>
-						</div>
-						<div class="health-bar">
-							<div class="hp-label">
-								HP
+					<div class="col-md-3 col-md-offset-1">
+						<div class="panel panel-default moves-panel" ng-show="playersTurn && currentPokemon && !currentPokemon.dead">
+							<div class="panel-heading">
+								<h2 style="margin-left: 10px;padding: 0px;">Moves</h2>
 							</div>
-							<div style="width:85%;float:left;">
-								<div ng-style="{'width': pokemon.currentHp/pokemon.totalHp*100 + '%'};" style="float:left;margin-top:10px;height:10px;background-color:lightgreen;border:2px solid white;"></div>
+							<div class="panel-body">
+								<ul class="list-group">
+									<li ng-click="attackEnemy(move)" ng-repeat="move in currentPokemon.moves track by $index" class="list-group-item clickable">
+										<label>{{ move.name | capitalize }}</label>
+									</li>
+								</ul>
 							</div>
-							<div style="background-color:black;width:100%;height: 8px;"></div>
 						</div>
-						<img ng-src="{{pokemon.imageFront}}" ng-click="setCurrentPokemon(pokemon)" alt="{{pokemon.name}}" />
 					</div>
 				</div>
+				<!-- <div class="row"> -->
+					<div ng-repeat="pokemon in pokemons track by $index" class="col-md-2">
+						<div class="pokemon">
+							<div class="pokemon-name">
+								<h1>{{ pokemon.name | capitalize }}</h1>
+							</div>
+							<div class="health-bar">
+								<div class="hp-label">
+									HP
+								</div>
+								<div style="width:85%;float:left;">
+									<div ng-style="{'width': pokemon.currentHp/pokemon.totalHp*100 + '%'};" style="float:left;margin-top:10px;height:10px;background-color:lightgreen;border:2px solid white;"></div>
+								</div>
+								<div style="background-color:black;width:100%;height: 8px;"></div>
+							</div>
+							<img ng-src="{{pokemon.imageFront}}" ng-click="setCurrentPokemon(pokemon)" alt="{{pokemon.name}}" />
+						</div>
+					</div>
+			<!-- 	</div> -->
 			</div>
 		</div>
-	</div>
+	</div> <!-- end background -->
+	
+	<!-- sounds -->
+	<audio id="battle-music">
+		<source src="./sounds/battle-music.mp3" type="audio/mpeg">
+	</audio>
+	<audio id="beep">
+		<source src="./sounds/beep.wav" type="audio/wav">
+	</audio>
+	<audio id="death">
+		<source src="./sounds/death.wav" type="audio/wav">
+	</audio>
+<!-- 	<audio id="stomp">
+		<source src="./sounds/stomp.wav" type="audio/wav">
+	</audio>
+	<audio id="theme-song">
+		<source src="./sounds/theme-song.mp3" type="audio/mpeg">
+	</audio> -->
 </body>
 </html>
