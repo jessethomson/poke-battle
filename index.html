@@ -77,7 +77,7 @@
 							</div>
 							<div class="panel-body">
 								<ul class="list-group">
-									<li ng-click="attackEnemy(move)" ng-repeat="move in currentPokemon.moves track by $index" class="list-group-item clickable">
+									<li ng-click="attackEnemy(move, $index)" ng-repeat="move in currentPokemon.moves track by $index" class="list-group-item clickable">
 										<label>{{ move.name | capitalize }}</label>
 									</li>
 								</ul>

@@ -99,35 +99,57 @@ app.controller('pokemonCtrl', function($scope, $http, $window) {
 	}
 
 
-	$scope.attackEnemy = function(move) {
+	$scope.attackEnemy = function(move, index) {
+		console.log(index);
 		if(!$scope.currentPokemon.dead) {
 			playAudio("beep");
 			$(".current-pokemon").animate({left: '250px', bottom:'80px'});
 			$('.enemy-pokemon').ClassyWiggle();
 			$scope.playersTurn = false;
 			$scope.gameStatus = $scope.currentPokemon.name + " uses " + capitalize(move.name);
-			var url = move.url;
-			$http.get(url).then(function(response) {
-				$(".current-pokemon").animate({left: '0px', bottom:'0px'});
-				$('.enemy-pokemon').ClassyWiggle("stop");
-				var newHp = $scope.enemyPokemon.currentHp - (response.data.power/2 + 5);
-				if(newHp > 0) {
-					$scope.enemyPokemon.currentHp = newHp;
-					$window.setTimeout(function() {
-						$scope.attackCurrentPokemon();
-					}, 500);
-				}
-				else {
-					playAudio("death");
-					$scope.enemyPokemon.currentHp = 0;
-					$scope.enemyPokemon.dead = true;
-					$scope.pokemonDefeated++;
-					$scope.experiencedGained += $scope.enemyPokemon.baseExperience;
-					loadEnemy();
-				}
-			}, function(error) {
-				console.log(error);
-			})
+			if(!move.power) {
+				console.log('get move stuff')
+				var url = move.url;
+				$http.get(url).then(function(response) {
+					if(!response.data.power) {
+						response.data.power = 0
+					}
+					// cache move power
+					$scope.currentPokemon.moves[index].power = response.data.power;
+					// update enemy health and movements accordingly
+					enemyAttackedHandler(response.data.power);
+
+				}, function(error) {
+					console.log(error);
+				})
+			}
+			else {
+				$window.setTimeout(function() {
+					// update enemy health of movements accordingly
+					enemyAttackedHandler(move.power);
+				},500);
+			}
+		}
+	}
+
+	function enemyAttackedHandler(power) {
+
+		$(".current-pokemon").animate({left: '0px', bottom:'0px'});
+		$('.enemy-pokemon').ClassyWiggle("stop");
+		var newHp = $scope.enemyPokemon.currentHp - (power/2 + 5);
+		if(newHp > 0) {
+			$scope.enemyPokemon.currentHp = newHp;
+			$window.setTimeout(function() {
+				$scope.attackCurrentPokemon();
+			}, 500);
+		}
+		else {
+			playAudio("death");
+			$scope.enemyPokemon.currentHp = 0;
+			$scope.enemyPokemon.dead = true;
+			$scope.pokemonDefeated++;
+			$scope.experiencedGained += $scope.enemyPokemon.baseExperience;
+			loadEnemy();
 		}
 	}
 
@@ -137,27 +159,47 @@ app.controller('pokemonCtrl', function($scope, $http, $window) {
 			var index = Math.floor(Math.random() * $scope.enemyPokemon.moves.length);
 			var move = $scope.enemyPokemon.moves[index];
 			$scope.gameStatus = $scope.enemyPokemon.name + " uses " + capitalize(move.name);
-			var url = move.url;
-			$http.get(url).then(function(response) {
-				$('.current-pokemon').ClassyWiggle("stop");
-				var newHp = $scope.currentPokemon.currentHp - (response.data.power/2 + 5);
-				if(newHp > 0) {
-					$scope.currentPokemon.currentHp = newHp;
-				}
-				else {
-					playAudio("death");
-					$scope.currentPokemon.currentHp = 0;
-					$scope.currentPokemon.dead = true;
-					$scope.pokemonRemaining--;
-					if($scope.pokemonRemaining <= 0) {
-						$scope.gameReady = false;
+			console.log(move);
+			if(!move.power) {
+				var url = move.url;
+				$http.get(url).then(function(response) {
+					if(!response.data.power) {
+						response.data.power = 0
 					}
-				}
-				$scope.playersTurn = true;
-			}, function(error) {
-				console.log(error);
-			});
+					// cache move power
+					$scope.enemyPokemon.moves[index].power = response.data.power;
+					// update current pokemon health and movements accordingly
+					currentPokemonAttackedHandler(response.data.power);
+
+				}, function(error) {
+					console.log(error);
+				});
+			}
+			else {
+				$window.setTimeout(function() {
+					currentPokemonAttackedHandler(move.power);
+				}, 500);
+			}
 		}
+	}
+
+	function currentPokemonAttackedHandler(power) {
+
+		$('.current-pokemon').ClassyWiggle("stop");
+		var newHp = $scope.currentPokemon.currentHp - (power/2 + 5);
+		if(newHp > 0) {
+			$scope.currentPokemon.currentHp = newHp;
+		}
+		else {
+			playAudio("death");
+			$scope.currentPokemon.currentHp = 0;
+			$scope.currentPokemon.dead = true;
+			$scope.pokemonRemaining--;
+			if($scope.pokemonRemaining <= 0) {
+				$scope.gameReady = false;
+			}
+		}
+		$scope.playersTurn = true;
 	}
 
 	$scope.setCurrentPokemon = function(pokemon) {
